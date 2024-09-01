@@ -8,6 +8,7 @@ import torch.nn.functional as F
 from opacus import PrivacyEngine
 from opacus.layers import DPLSTM
 from torch import nn, optim
+from torch.utils.data import TensorDataset, DataLoader
 
 import data
 import utils
@@ -43,27 +44,37 @@ def main(args):
     mdict['lstm'] = LSTMNet
 
     train_data, train_labels = get_data(args)
+
+    train_data = torch.tensor(train_data)
+    train_labels = torch.tensor(train_labels)
+
+    if args.experiment == 'logreg':
+        train_labels = train_labels.unsqueeze(1)
+
+    dataset = TensorDataset(train_data, train_labels)
+
+    train_loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
+
     model = mdict[args.experiment](vocab_size=args.max_features, batch_size=args.batch_size).cuda()
     optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, momentum=0)
     loss_function = nn.CrossEntropyLoss() if args.experiment != 'logreg' else nn.BCELoss()
 
-    privacy_engine = PrivacyEngine(
-        model,
-        batch_size=args.batch_size,
-        sample_size=len(train_data),
-        alphas=[1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64)),
+    privacy_engine = PrivacyEngine()
+
+    model, optimizer, train_loader = privacy_engine.make_private(
+        module=model,
+        optimizer=optimizer,
+        data_loader=train_loader,
         noise_multiplier=args.sigma,
         max_grad_norm=args.max_per_sample_grad_norm,
     )
-    privacy_engine.attach(optimizer)
 
     timings = []
     for epoch in range(1, args.epochs + 1):
         start = time.perf_counter()
-        dataloader = data.dataloader(train_data, train_labels, args.batch_size)
-        for batch_idx, (x, y) in enumerate(dataloader):
+        for batch_idx, (x, y) in enumerate(train_loader):
             x, y = x.cuda(non_blocking=True), y.cuda(non_blocking=True)
-            model.zero_grad()
+            optimizer.zero_grad()
             outputs = model(x)
             loss = loss_function(outputs, y)
             loss.backward()
@@ -72,14 +83,10 @@ def main(args):
         duration = time.perf_counter() - start
         print("Time Taken for Epoch: ", duration)
         timings.append(duration)
-
-        if args.dpsgd:
-            epsilon, best_alpha = optimizer.privacy_engine.get_privacy_spent(args.delta)
-            print(f"Train Epoch: {epoch} \t"
-                  # f"Loss: {np.mean(losses):.6f} "
-                  f"(ε = {epsilon:.2f}, δ = {args.delta}) for α = {best_alpha}")
-        else:
-            print(f"Train Epoch: {epoch} \t Loss: {np.mean(losses):.6f}")
+        
+        epsilon = privacy_engine.accountant.get_epsilon(delta=args.delta)
+        print(f"Train Epoch: {epoch} \t"
+             f"(ε = {epsilon:.2f}, δ = {args.delta})")
 
     if not args.no_save:
         utils.save_runtimes(__file__.split('.')[0], args, timings)

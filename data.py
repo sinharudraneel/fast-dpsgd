@@ -121,7 +121,7 @@ def load_adult(**_):
 
 
 def load_dummy_adult(num_examples, **_):
-    train_data = np.random.random((num_examples, 104)).astype(np.float32)
+    train_data = np.random.random((num_examples, 14)).astype(np.float32)
     train_labels = np.random.random(num_examples).round().astype(np.int32)
     return (train_data, train_labels), None
 

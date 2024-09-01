@@ -67,7 +67,7 @@ class MNISTNet(nn.Module):
 class FFNN(nn.Module):
     def __init__(self, **_):
         super().__init__()
-        self.fc1 = nn.Linear(104, 50)
+        self.fc1 = nn.Linear(14, 50)
         self.fc2 = nn.Linear(50, 2)
 
     def forward(self, x):
@@ -80,7 +80,7 @@ class FFNN(nn.Module):
 class Logistic(nn.Module):
     def __init__(self, **_):
         super().__init__()
-        self.fc1 = nn.Linear(104, 1)
+        self.fc1 = nn.Linear(14, 1)
 
     def forward(self, x):
         out = self.fc1(x)
@@ -159,6 +159,11 @@ def main(args):
             x, y = x.cuda(non_blocking=True), y.cuda(non_blocking=True)
             model.zero_grad()
             outputs = model(x)
+
+            if args.experiment == 'logreg':
+                y = y.unsqueeze(1)
+                y = y.float()
+            
             loss = loss_function(outputs, y)
             loss.backward()
             optimizer.step()

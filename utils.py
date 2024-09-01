@@ -1,5 +1,6 @@
 import argparse
 import pickle
+import os
 
 
 def get_parser(experiments):
@@ -30,8 +31,14 @@ def save_runtimes(filename, args, timings, append_to_name=''):
     if hasattr(args, 'use_xla'):
         pickle_name += f'_xla_{args.use_xla}'
     pickle_name += append_to_name
-    full_path = './results/raw/' + pickle_name + '.pkl'
-    print('Saving to: ', full_path)
+
+    results_dir = './results/raw'
+    os.makedirs(results_dir, exist_ok=True)
+
+    full_path = os.path.join(results_dir, pickle_name + '.pkl')
+
+    #full_path = './results/raw/' + pickle_name + '.pkl'
+    #print('Saving to: ', full_path)
 
     with open(full_path, 'wb') as handle:
         pickle.dump(d, handle, protocol=pickle.HIGHEST_PROTOCOL)

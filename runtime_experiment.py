@@ -10,29 +10,29 @@ def launch(expt, batch_size, epochs):
     errors = []
     # yapf: disable
     cmds = [
-        ('jax', f'CUDA_VISIBLE_DEVICES=0 python jaxdp.py {expt} --no_dpsgd --epochs {epochs} --batch_size {batch_size}'),
-        ('tf2', f'CUDA_VISIBLE_DEVICES=0 python tf2dp.py {expt} --no_dpsgd --epochs {epochs} --batch_size {batch_size} --no_xla'),
-        ('tf1', f'CUDA_VISIBLE_DEVICES=0 python tf1dp.py {expt} --no_dpsgd --epochs {epochs} --batch_size {batch_size} --no_xla'),
+        #('jax', f'CUDA_VISIBLE_DEVICES=0 python jaxdp.py {expt} --no_dpsgd --epochs {epochs} --batch_size {batch_size}'),
+        #('tf2', f'CUDA_VISIBLE_DEVICES=0 python tf2dp.py {expt} --no_dpsgd --epochs {epochs} --batch_size {batch_size} --no_xla'),
+        #('tf1', f'CUDA_VISIBLE_DEVICES=0 python tf1dp.py {expt} --no_dpsgd --epochs {epochs} --batch_size {batch_size} --no_xla'),
         ('pytorch', f'CUDA_VISIBLE_DEVICES=0 python pytorch.py {expt} --no_dpsgd --epochs {epochs} --batch_size {batch_size}'),
-        ('jaxdp', f'CUDA_VISIBLE_DEVICES=0 python jaxdp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size}'),
-        ('tf2dp', f'CUDA_VISIBLE_DEVICES=0 python tf2dp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --no_xla'),
-        ('tf1dp', f'CUDA_VISIBLE_DEVICES=0 python tf1dp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --no_xla'),
+        #('jaxdp', f'CUDA_VISIBLE_DEVICES=0 python jaxdp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size}'),
+        #('tf2dp', f'CUDA_VISIBLE_DEVICES=0 python tf2dp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --no_xla'),
+        #('tf1dp', f'CUDA_VISIBLE_DEVICES=0 python tf1dp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --no_xla'),
         ('opacusdp', f'CUDA_VISIBLE_DEVICES=0 python opacusdp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size}'),
-        ('backpackdp', f'CUDA_VISIBLE_DEVICES=0 python backpackdp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size}'),
-        ('pyvacydp', f'CUDA_VISIBLE_DEVICES=0 python pyvacydp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size}'),
-        ('owkindp', f'CUDA_VISIBLE_DEVICES=0 python owkindp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size}'),
-        ('tf2xla', f'CUDA_VISIBLE_DEVICES=0 python tf2dp.py {expt} --no_dpsgd --epochs {epochs} --batch_size {batch_size} --xla'),
-        ('tf2dpxla', f'CUDA_VISIBLE_DEVICES=0 python tf2dp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --xla'),
-        ('tf1xla', f'TF_XLA_FLAGS=--tf_xla_auto_jit=2 CUDA_VISIBLE_DEVICES=0 python tf1dp.py {expt} --no_dpsgd --epochs {epochs} --batch_size {batch_size} --xla'),
-        ('tf1dpxla', f'TF_XLA_FLAGS=--tf_xla_auto_jit=2 CUDA_VISIBLE_DEVICES=0 python tf1dp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --xla'),
+        #('backpackdp', f'CUDA_VISIBLE_DEVICES=0 python backpackdp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size}'),
+        #('pyvacydp', f'CUDA_VISIBLE_DEVICES=0 python pyvacydp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size}'),
+        #('owkindp', f'CUDA_VISIBLE_DEVICES=0 python owkindp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size}'),
+        #('tf2xla', f'CUDA_VISIBLE_DEVICES=0 python tf2dp.py {expt} --no_dpsgd --epochs {epochs} --batch_size {batch_size} --xla'),
+        #('tf2dpxla', f'CUDA_VISIBLE_DEVICES=0 python tf2dp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --xla'),
+        #('tf1xla', f'TF_XLA_FLAGS=--tf_xla_auto_jit=2 CUDA_VISIBLE_DEVICES=0 python tf1dp.py {expt} --no_dpsgd --epochs {epochs} --batch_size {batch_size} --xla'),
+        #('tf1dpxla', f'TF_XLA_FLAGS=--tf_xla_auto_jit=2 CUDA_VISIBLE_DEVICES=0 python tf1dp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --xla'),
         # For Ablations:
-        ('jaxdp_nv', f'CUDA_VISIBLE_DEVICES=0 python jaxdp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --no_vmap'),
+        #('jaxdp_nv', f'CUDA_VISIBLE_DEVICES=0 python jaxdp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --no_vmap'),
         # Outside of JIT compilation, the dynamic_unroll's LSTM (using scan) is faster than the static_unroll'd version.
-        ('jaxdp_nj', f'CUDA_VISIBLE_DEVICES=0 python jaxdp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --no_jit --dynamic_unroll'),
-        ('jaxdp_nvj', f'CUDA_VISIBLE_DEVICES=0 python jaxdp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --no_vmap --no_jit --dynamic_unroll'),
-        ('tf2dp_nv', f'CUDA_VISIBLE_DEVICES=0 python tf2dp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --no_xla --no_vmap'),
-        ('tf2dp_nvj', f'CUDA_VISIBLE_DEVICES=0 python tf2dp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --no_xla --no_vmap --no_jit'),
-        ('tf2dpxla_nv', f'CUDA_VISIBLE_DEVICES=0 python tf2dp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --xla --no_vmap'),
+        #('jaxdp_nj', f'CUDA_VISIBLE_DEVICES=0 python jaxdp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --no_jit --dynamic_unroll'),
+        #('jaxdp_nvj', f'CUDA_VISIBLE_DEVICES=0 python jaxdp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --no_vmap --no_jit --dynamic_unroll'),
+        #('tf2dp_nv', f'CUDA_VISIBLE_DEVICES=0 python tf2dp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --no_xla --no_vmap'),
+        #('tf2dp_nvj', f'CUDA_VISIBLE_DEVICES=0 python tf2dp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --no_xla --no_vmap --no_jit'),
+        #('tf2dpxla_nv', f'CUDA_VISIBLE_DEVICES=0 python tf2dp.py {expt} --dpsgd --epochs {epochs} --batch_size {batch_size} --xla --no_vmap'),
     ]
     # yapf: enable
     for name, cmd in cmds:
