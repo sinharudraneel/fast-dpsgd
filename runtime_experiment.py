@@ -78,7 +78,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser('Returns Max Batch Size before OOM')
     parser.add_argument('--epochs', default=20, type=int)
     parser.add_argument('--experiments',
-                        default=['logreg', 'ffnn', 'mnist', 'embed', 'lstm', 'cifar10'],
+                        default=['logreg', 'ffnn', 'mnist', 'embed', 'cifar10'],
                         nargs='+')
     parser.add_argument('--batch_sizes', default=[256, 128, 64, 32, 16], nargs='+', type=int)
     args = parser.parse_args()
